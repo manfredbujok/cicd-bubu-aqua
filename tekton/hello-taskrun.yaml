@@ -1,0 +1,8 @@
+apiVersion: tekton.dev/v1
+kind: TaskRun
+metadata:
+  generateName: hello-bubu-aqua-
+  namespace: cicd-bubu-aqua
+spec:
+  taskRef:
+    name: hello-bubu-aqua

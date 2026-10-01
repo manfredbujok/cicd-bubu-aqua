@@ -1,0 +1,52 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: bubu-aqua-ci
+  namespace: cicd-bubu-aqua
+spec:
+  params:
+    - name: repo-url
+      type: string
+    - name: image
+      type: string
+
+  workspaces:
+    - name: shared-workspace
+
+  tasks:
+    - name: clone
+      taskRef:
+        name: git-clone-bubu-aqua
+      params:
+        - name: url
+          value: $(params.repo-url)
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+
+    - name: hello
+      runAfter:
+        - clone
+      taskRef:
+        name: hello-bubu-aqua
+
+    - name: verify
+      runAfter:
+        - hello
+      taskRef:
+        name: verify-bubu-aqua
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+
+    - name: build-image
+      runAfter:
+        - verify
+      taskRef:
+        name: build-image-bubu-aqua
+      params:
+        - name: image
+          value: $(params.image)
+      workspaces:
+        - name: source
+          workspace: shared-workspace

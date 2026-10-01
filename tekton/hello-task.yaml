@@ -1,0 +1,17 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: hello-bubu-aqua
+  namespace: cicd-bubu-aqua
+spec:
+  steps:
+    - name: hello
+      image: alpine:3.22
+      script: |
+        #!/bin/sh
+        echo "================================"
+        echo "   BUBU & AQUA CI/CD LAB 🚀"
+        echo "================================"
+        echo "Tekton is running!"
+        echo "Namespace: cicd-bubu-aqua"
+        echo "Next stop: CI/CD!"
