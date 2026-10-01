@@ -15,6 +15,6 @@ spec:
     spec:
       containers:
         - name: bubu-aqua
-          image: nginx:alpine
+          image: registry.kube-system.svc:80/bubu-aqua:1.0.0
           ports:
             - containerPort: 80
