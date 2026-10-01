@@ -15,6 +15,6 @@ spec:
     spec:
       containers:
         - name: bubu-aqua
-          image: registry.kube-system.svc:80/bubu-aqua:1.0.0
+          image: localhost:5000/bubu-aqua:1.0.0
           ports:
             - containerPort: 80
