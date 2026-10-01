@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: bubu-aqua
+  namespace: cicd-bubu-aqua
+spec:
+  selector:
+    app: bubu-aqua
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+  type: ClusterIP

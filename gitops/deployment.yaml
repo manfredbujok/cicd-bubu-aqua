@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bubu-aqua
+  namespace: cicd-bubu-aqua
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bubu-aqua
+  template:
+    metadata:
+      labels:
+        app: bubu-aqua
+    spec:
+      containers:
+        - name: bubu-aqua
+          image: nginx:alpine
+          ports:
+            - containerPort: 80
