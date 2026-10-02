@@ -8,7 +8,18 @@ spec:
 
   triggers:
     - name: github-push
+
+      interceptors:
+        - ref:
+            name: cel
+          params:
+            - name: filter
+              value: >-
+                header.match('X-GitHub-Event', 'push') &&
+                !body.head_commit.message.contains('[skip ci]')
+
       bindings:
         - ref: bubu-aqua-binding
+
       template:
         ref: bubu-aqua-template

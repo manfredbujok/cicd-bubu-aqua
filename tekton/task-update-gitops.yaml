@@ -1,0 +1,73 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: update-gitops
+  namespace: cicd-bubu-aqua
+
+spec:
+  params:
+    - name: git-revision
+      type: string
+
+  workspaces:
+    - name: source
+
+  steps:
+    - name: update-and-push
+      image: alpine/git:latest
+      workingDir: $(workspaces.source.path)
+
+      env:
+        - name: GITHUB_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: github-credentials
+              key: token
+
+      script: |
+        #!/bin/sh
+        set -eu
+
+        echo "================================"
+        echo " BUBU & AQUA - UPDATE GITOPS 🚀"
+        echo "================================"
+
+        SHA="$(params.git-revision)"
+
+        echo "New image tag: ${SHA}"
+
+        sed -i \
+          "s#image: localhost:5000/bubu-aqua:.*#image: localhost:5000/bubu-aqua:${SHA}#" \
+          gitops/deployment.yaml
+
+        echo "Updated deployment:"
+        grep "image:" gitops/deployment.yaml
+
+        git config user.name "Bubu Aqua CI"
+        git config user.email "bubu-aqua-ci@localhost"
+
+        git add gitops/deployment.yaml
+
+        if git diff --cached --quiet; then
+          echo "No GitOps change necessary."
+          exit 0
+        fi
+
+        git commit -m "Deploy ${SHA} [skip ci]"
+
+        cat > /tmp/git-askpass.sh <<'EOF'
+        #!/bin/sh
+        case "$1" in
+          *Username*) echo "x-access-token" ;;
+          *Password*) echo "$GITHUB_TOKEN" ;;
+        esac
+        EOF
+
+        chmod 700 /tmp/git-askpass.sh
+
+        export GIT_ASKPASS=/tmp/git-askpass.sh
+        export GIT_TERMINAL_PROMPT=0
+
+        git push origin HEAD:main
+
+        echo "GitOps update pushed successfully."

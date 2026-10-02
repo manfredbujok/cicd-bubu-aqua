@@ -17,11 +17,13 @@ spec:
 
   tasks:
     - name: clone
-      taskRef:
-        name: git-clone-bubu-aqua
       params:
         - name: url
           value: $(params.repo-url)
+        - name: revision
+          value: $(params.git-revision)
+      taskRef:
+        name: git-clone-bubu-aqua
       workspaces:
         - name: source
           workspace: shared-workspace
@@ -49,6 +51,18 @@ spec:
       params:
         - name: image
           value: $(params.image)
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+
+    - name: update-gitops
+      runAfter:
+        - build-image
+      taskRef:
+        name: update-gitops
+      params:
+        - name: git-revision
+          value: $(params.git-revision)
       workspaces:
         - name: source
           workspace: shared-workspace
