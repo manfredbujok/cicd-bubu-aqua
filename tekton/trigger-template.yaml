@@ -23,7 +23,7 @@ spec:
             value: $(tt.params.repo-url)
 
           - name: image
-            value: registry.kube-system.svc:80/bubu-aqua:latest
+            value: registry.kube-system.svc:80/bubu-aqua:$(tt.params.git-revision)
 
           - name: git-revision
             value: $(tt.params.git-revision)
