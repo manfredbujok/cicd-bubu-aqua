@@ -25,6 +25,9 @@ spec:
           - name: image
             value: registry.kube-system.svc:80/bubu-aqua:latest
 
+          - name: git-revision
+            value: $(tt.params.git-revision)
+
         workspaces:
           - name: shared-workspace
             persistentVolumeClaim:
