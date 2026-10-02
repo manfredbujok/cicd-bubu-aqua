@@ -1,0 +1,80 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: bubu-aqua-trigger-sa
+  namespace: cicd-bubu-aqua
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: bubu-aqua-trigger-role
+  namespace: cicd-bubu-aqua
+rules:
+  - apiGroups:
+      - triggers.tekton.dev
+    resources:
+      - eventlisteners
+      - triggerbindings
+      - triggertemplates
+      - triggers
+      - interceptors
+    verbs:
+      - get
+      - list
+      - watch
+
+  - apiGroups:
+      - tekton.dev
+    resources:
+      - pipelineruns
+    verbs:
+      - create
+      - get
+      - list
+      - watch
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: bubu-aqua-trigger-binding
+  namespace: cicd-bubu-aqua
+subjects:
+  - kind: ServiceAccount
+    name: bubu-aqua-trigger-sa
+    namespace: cicd-bubu-aqua
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: bubu-aqua-trigger-role
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: bubu-aqua-trigger-cluster-role
+rules:
+  - apiGroups:
+      - triggers.tekton.dev
+    resources:
+      - clustertriggerbindings
+      - clusterinterceptors
+    verbs:
+      - get
+      - list
+      - watch
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: bubu-aqua-trigger-cluster-binding
+subjects:
+  - kind: ServiceAccount
+    name: bubu-aqua-trigger-sa
+    namespace: cicd-bubu-aqua
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: bubu-aqua-trigger-cluster-role

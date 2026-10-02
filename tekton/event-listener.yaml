@@ -1,0 +1,14 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: EventListener
+metadata:
+  name: bubu-aqua-listener
+  namespace: cicd-bubu-aqua
+spec:
+  serviceAccountName: bubu-aqua-trigger-sa
+
+  triggers:
+    - name: github-push
+      bindings:
+        - ref: bubu-aqua-binding
+      template:
+        ref: bubu-aqua-template
