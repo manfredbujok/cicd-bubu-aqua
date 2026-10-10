@@ -16,8 +16,8 @@ spec:
       image: gcr.io/kaniko-project/executor:v1.23.2
       workingDir: $(workspaces.source.path)
       args:
-        - --dockerfile=$(workspaces.source.path)/app/Dockerfile
-        - --context=$(workspaces.source.path)/app
+        - --dockerfile=$(workspaces.source.path)/Dockerfile
+        - --context=$(workspaces.source.path)
         - --destination=$(params.image)
         - --insecure
         - --skip-tls-verify

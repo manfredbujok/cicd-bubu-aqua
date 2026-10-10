@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: bubu-aqua
-  namespace: cicd-bubu-aqua
+  namespace: bubu-aqua-dev
 spec:
   selector:
     app: bubu-aqua

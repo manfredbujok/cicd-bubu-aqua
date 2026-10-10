@@ -63,6 +63,5 @@ spec:
       params:
         - name: git-revision
           value: $(params.git-revision)
-      workspaces:
-        - name: source
-          workspace: shared-workspace
+        - name: gitops-repo-url
+          value: https://github.com/manfredbujok/cicd-bubu-aqua.git

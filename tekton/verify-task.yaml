@@ -3,6 +3,7 @@ kind: Task
 metadata:
   name: verify-bubu-aqua
   namespace: cicd-bubu-aqua
+
 spec:
   workspaces:
     - name: source
@@ -11,36 +12,30 @@ spec:
     - name: verify
       image: alpine:3.22
       workingDir: $(workspaces.source.path)
+
       script: |
         #!/bin/sh
         set -eu
 
         echo "================================"
-        echo " BUBU & AQUA - VERIFY 🔍"
+        echo " BUBU & AQUA - APP VERIFY 🔍"
         echo "================================"
 
         echo "Workspace:"
         pwd
 
         echo ""
-        echo "Repository:"
+        echo "Application repository:"
         ls -la
 
         echo ""
-        echo "GitOps manifests:"
-        ls -la gitops
+        echo "Checking required application files..."
+
+        test -f Dockerfile
+        echo "✓ Dockerfile"
+
+        test -f index.html
+        echo "✓ index.html"
 
         echo ""
-        echo "Checking required files..."
-
-        test -f gitops/deployment.yaml
-        echo "✓ deployment.yaml"
-
-        test -f gitops/service.yaml
-        echo "✓ service.yaml"
-
-        test -f README.md
-        echo "✓ README.md"
-
-        echo ""
-        echo "Bubu & Aqua source verification passed 🚀"
+        echo "Bubu & Aqua application verification passed 🚀"

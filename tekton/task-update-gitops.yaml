@@ -9,13 +9,12 @@ spec:
     - name: git-revision
       type: string
 
-  workspaces:
-    - name: source
+    - name: gitops-repo-url
+      type: string
 
   steps:
     - name: update-and-push
       image: alpine/git:latest
-      workingDir: $(workspaces.source.path)
 
       env:
         - name: GITHUB_TOKEN
@@ -33,8 +32,22 @@ spec:
         echo "================================"
 
         SHA="$(params.git-revision)"
+        GITOPS_REPO="$(params.gitops-repo-url)"
 
         echo "New image tag: ${SHA}"
+        echo "GitOps repository: ${GITOPS_REPO}"
+
+        rm -rf /tmp/gitops
+
+        echo ""
+        echo "Cloning GitOps repository..."
+
+        git clone "${GITOPS_REPO}" /tmp/gitops
+
+        cd /tmp/gitops
+
+        echo ""
+        echo "Updating deployment..."
 
         sed -i \
           "s#image: localhost:5000/bubu-aqua:.*#image: localhost:5000/bubu-aqua:${SHA}#" \
@@ -70,4 +83,5 @@ spec:
 
         git push origin HEAD:main
 
-        echo "GitOps update pushed successfully."
+        echo ""
+        echo "GitOps update pushed successfully. 🚀"
