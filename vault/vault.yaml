@@ -1,0 +1,14 @@
+server:
+  standalone:
+    enabled: true
+
+  dataStorage:
+    enabled: true
+    size: 1Gi
+    storageClass: standard
+
+  service:
+    enabled: true
+
+ui:
+  enabled: true
