@@ -18,6 +18,9 @@ spec:
         - name: dim-image-predictor
           image: docker.io/taiiku/dim-image-predictor:0.4.8
           imagePullPolicy: IfNotPresent
+          env:
+            - name: APP_HOST
+              value: "127.0.0.1"
           ports:
             - containerPort: 8000
           resources:
