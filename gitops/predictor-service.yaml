@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: dim-image-predictor
+  namespace: bubu-aqua-dev
+spec:
+  type: ClusterIP
+  selector:
+    app: dim-image-predictor
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+      protocol: TCP
