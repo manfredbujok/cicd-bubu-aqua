@@ -1,0 +1,122 @@
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: predictor-auth
+  namespace: bubu-aqua-dev
+data:
+  proxy.py: |
+    import os
+    import hmac
+    import http.client
+    from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+    TOKEN_FILE = "/run/secrets/predictor/API_TOKEN"
+    UPSTREAM_HOST = "127.0.0.1"
+    UPSTREAM_PORT = 8000
+
+    class Handler(BaseHTTPRequestHandler):
+
+        def log_message(self, format, *args):
+            # Keine Request-Header oder Tokens loggen
+            pass
+
+        def handle_request(self):
+            try:
+                with open(TOKEN_FILE, encoding="utf-8") as f:
+                    expected = f.read().strip()
+            except OSError:
+                self.send_error(503, "Authentication unavailable")
+                return
+
+            supplied = self.headers.get("Authorization", "")
+            prefix = "Bearer "
+
+            if (
+                    not expected
+                    or not supplied.startswith(prefix)
+                    or not hmac.compare_digest(
+                supplied[len(prefix):], expected
+            )
+            ):
+                self.send_response(401)
+                self.send_header(
+                    "WWW-Authenticate", "Bearer"
+                )
+                self.send_header("Content-Length", "0")
+                self.end_headers()
+                return
+
+            try:
+                body_length = int(
+                    self.headers.get("Content-Length", "0")
+                )
+                if body_length < 0 or body_length > 20 * 1024 * 1024:
+                    self.send_error(413)
+                    return
+
+                body = self.rfile.read(body_length)
+
+                connection = http.client.HTTPConnection(
+                    UPSTREAM_HOST, UPSTREAM_PORT, timeout=300
+                )
+
+                headers = {
+                    k: v for k, v in self.headers.items()
+                    if k.lower() not in (
+                        "authorization", "host",
+                        "connection", "content-length",
+                        "transfer-encoding", "expect",
+                        "proxy-authorization",
+                        "proxy-connection", "te",
+                        "trailer", "upgrade"
+                    )
+                }
+
+                headers["Content-Length"] = str(len(body))
+
+                connection.request(
+                    self.command, self.path, body, headers
+                )
+
+                response = connection.getresponse()
+                response_body = response.read()
+
+                self.send_response(response.status)
+
+                for key, value in response.getheaders():
+                    if key.lower() not in (
+                            "transfer-encoding", "connection",
+                            "content-length", "keep-alive",
+                            "upgrade"
+                    ):
+                        self.send_header(key, value)
+
+                self.send_header(
+                    "Content-Length", str(len(response_body))
+                )
+                self.end_headers()
+                self.wfile.write(response_body)
+                connection.close()
+
+            except Exception:
+                self.send_error(502, "Upstream unavailable")
+
+        def do_GET(self):
+            self.handle_request()
+
+        def do_POST(self):
+            self.handle_request()
+
+        def do_PUT(self):
+            self.handle_request()
+
+        def do_DELETE(self):
+            self.handle_request()
+
+        def do_PATCH(self):
+            self.handle_request()
+
+    ThreadingHTTPServer(
+        ("0.0.0.0", 8080), Handler
+    ).serve_forever()

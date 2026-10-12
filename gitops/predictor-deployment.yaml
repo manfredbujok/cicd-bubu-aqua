@@ -1,3 +1,4 @@
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -38,3 +39,34 @@ spec:
               port: 8000
             initialDelaySeconds: 30
             periodSeconds: 20
+
+        - name: auth-proxy
+          image: python:3.12-alpine
+          imagePullPolicy: IfNotPresent
+          command:
+            - python
+            - /app/proxy.py
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              cpu: 25m
+              memory: 32Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi
+          volumeMounts:
+            - name: auth-config
+              mountPath: /app
+              readOnly: true
+            - name: predictor-token
+              mountPath: /run/secrets/predictor
+              readOnly: true
+
+      volumes:
+        - name: auth-config
+          configMap:
+            name: predictor-auth
+        - name: predictor-token
+          secret:
+            secretName: predictor-api-token
