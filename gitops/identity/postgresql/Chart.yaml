@@ -1,0 +1,6 @@
+apiVersion: v2
+name: bubu-aqua-postgresql
+description: PostgreSQL database for Bubu & Aqua Identity Management
+type: application
+version: 0.1.0
+appVersion: "18"

@@ -1,0 +1,31 @@
+replicaCount: 1
+
+image:
+  repository: postgres
+  tag: "18.0"
+  pullPolicy: IfNotPresent
+
+postgresql:
+  database: keycloak
+  username: keycloak
+
+  existingSecret: keycloak-postgresql
+  passwordSecretKey: password
+
+service:
+  type: ClusterIP
+  port: 5432
+
+persistence:
+  enabled: true
+  size: 5Gi
+  storageClass: standard
+  accessMode: ReadWriteOnce
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: "1"
+    memory: 1Gi
