@@ -1,0 +1,65 @@
+{{- if .Values.nodes.firefox.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: selenium-firefox
+spec:
+  replicas: {{ .Values.nodes.firefox.replicas }}
+  selector:
+    matchLabels:
+      app: selenium-firefox
+  template:
+    metadata:
+      labels:
+        app: selenium-firefox
+    spec:
+      containers:
+        - name: firefox
+          image: "{{ .Values.nodes.firefox.image.repository }}:{{ .Values.nodes.firefox.image.tag }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+
+          env:
+            - name: SE_EVENT_BUS_HOST
+              value: {{ .Values.hub.name | quote }}
+            - name: SE_EVENT_BUS_PUBLISH_PORT
+              value: "{{ .Values.hub.service.publishPort }}"
+            - name: SE_EVENT_BUS_SUBSCRIBE_PORT
+              value: "{{ .Values.hub.service.subscribePort }}"
+            - name: SE_NODE_MAX_SESSIONS
+              value: "{{ .Values.selenium.maxSessions }}"
+            - name: SE_NODE_SESSION_TIMEOUT
+              value: "{{ .Values.selenium.sessionTimeout }}"
+            - name: SE_NODE_OVERRIDE_MAX_SESSIONS
+              value: "false"
+
+          ports:
+            - name: webdriver
+              containerPort: 5555
+
+          volumeMounts:
+            - name: dshm
+              mountPath: /dev/shm
+
+          readinessProbe:
+            httpGet:
+              path: /status
+              port: webdriver
+            initialDelaySeconds: 15
+            periodSeconds: 10
+
+          livenessProbe:
+            httpGet:
+              path: /status
+              port: webdriver
+            initialDelaySeconds: 30
+            periodSeconds: 20
+
+          resources:
+            {{- toYaml .Values.nodes.firefox.resources | nindent 12 }}
+
+      volumes:
+        - name: dshm
+          emptyDir:
+            medium: Memory
+            sizeLimit: {{ .Values.selenium.shmSize }}
+{{- end }}

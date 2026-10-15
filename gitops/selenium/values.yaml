@@ -1,0 +1,71 @@
+global:
+  imagePullPolicy: IfNotPresent
+
+hub:
+  name: selenium-hub
+  image:
+    repository: selenium/hub
+    tag: "4.41.0-20260222"
+
+  replicas: 1
+
+  service:
+    port: 4444
+    publishPort: 4442
+    subscribePort: 4443
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi
+
+nodes:
+  chrome:
+    enabled: true
+    replicas: 1
+    image:
+      repository: selenium/node-chrome
+      tag: "4.41.0-20260222"
+    resources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+      limits:
+        cpu: "2"
+        memory: 2Gi
+
+  firefox:
+    enabled: true
+    replicas: 1
+    image:
+      repository: selenium/node-firefox
+      tag: "4.41.0-20260222"
+    resources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+      limits:
+        cpu: "2"
+        memory: 2Gi
+
+  edge:
+    enabled: true
+    replicas: 1
+    image:
+      repository: selenium/node-edge
+      tag: "4.41.0-20260222"
+    resources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+      limits:
+        cpu: "2"
+        memory: 2Gi
+
+selenium:
+  maxSessions: 1
+  sessionTimeout: 300
+  shmSize: 2Gi

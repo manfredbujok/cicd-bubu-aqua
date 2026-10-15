@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: selenium-grid
+  namespace: argocd
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/manfredbujok/cicd-bubu-aqua.git
+    targetRevision: main
+    path: gitops/selenium
+    helm:
+      releaseName: selenium
+      valueFiles:
+        - values.yaml
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: selenium
+
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: false
+    syncOptions:
+      - CreateNamespace=true

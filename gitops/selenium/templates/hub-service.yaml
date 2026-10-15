@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.hub.name }}
+spec:
+  type: ClusterIP
+  selector:
+    app: {{ .Values.hub.name }}
+  ports:
+    - name: http
+      port: {{ .Values.hub.service.port }}
+      targetPort: http
+    - name: publish
+      port: {{ .Values.hub.service.publishPort }}
+      targetPort: publish
+    - name: subscribe
+      port: {{ .Values.hub.service.subscribePort }}
+      targetPort: subscribe

@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.hub.name }}
+spec:
+  replicas: {{ .Values.hub.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.hub.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.hub.name }}
+    spec:
+      containers:
+        - name: selenium-hub
+          image: "{{ .Values.hub.image.repository }}:{{ .Values.hub.image.tag }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+          ports:
+            - name: http
+              containerPort: 4444
+            - name: publish
+              containerPort: 4442
+            - name: subscribe
+              containerPort: 4443
+          env:
+            - name: SE_SESSION_REQUEST_TIMEOUT
+              value: "{{ .Values.selenium.sessionTimeout }}"
+          readinessProbe:
+            httpGet:
+              path: /status
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /status
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          resources:
+            {{- toYaml .Values.hub.resources | nindent 12 }}
