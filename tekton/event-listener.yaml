@@ -16,6 +16,7 @@ spec:
             - name: filter
               value: >-
                 header.match('X-GitHub-Event', 'push') &&
+                body.ref == 'refs/heads/main' &&
                 !body.head_commit.message.contains('[skip ci]')
 
       bindings:
