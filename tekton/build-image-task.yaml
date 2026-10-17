@@ -3,10 +3,19 @@ kind: Task
 metadata:
   name: build-image-bubu-aqua
   namespace: cicd-bubu-aqua
+
 spec:
   params:
     - name: image
       type: string
+
+    - name: dockerfile
+      type: string
+      default: Dockerfile
+
+    - name: build-context
+      type: string
+      default: .
 
   workspaces:
     - name: source
@@ -14,10 +23,12 @@ spec:
   steps:
     - name: build-and-push
       image: gcr.io/kaniko-project/executor:v1.23.2
+
       workingDir: $(workspaces.source.path)
+
       args:
-        - --dockerfile=$(workspaces.source.path)/Dockerfile
-        - --context=$(workspaces.source.path)
+        - --dockerfile=$(workspaces.source.path)/$(params.dockerfile)
+        - --context=$(workspaces.source.path)/$(params.build-context)
         - --destination=$(params.image)
         - --insecure
         - --skip-tls-verify

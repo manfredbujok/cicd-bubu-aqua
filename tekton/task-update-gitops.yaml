@@ -12,6 +12,14 @@ spec:
     - name: gitops-repo-url
       type: string
 
+    - name: deployment-file
+      type: string
+      default: gitops/deployment.yaml
+
+    - name: image
+      type: string
+      default: localhost:5000/bubu-aqua
+
   steps:
     - name: update-and-push
       image: alpine/git:latest
@@ -33,6 +41,9 @@ spec:
 
         SHA="$(params.git-revision)"
         GITOPS_REPO="$(params.gitops-repo-url)"
+        
+        DEPLOYMENT_FILE="$(params.deployment-file)"
+        IMAGE="$(params.image)"
 
         echo "New image tag: ${SHA}"
         echo "GitOps repository: ${GITOPS_REPO}"
@@ -49,17 +60,31 @@ spec:
         echo ""
         echo "Updating deployment..."
 
+        test -f "$DEPLOYMENT_FILE" || {
+          echo "ERROR: Deployment file not found: $DEPLOYMENT_FILE"
+          exit 1
+        }
+      
+        echo "Checking target image..."
+      
+        IMAGE_COUNT=$(grep -Fc "image: ${IMAGE}:" "$DEPLOYMENT_FILE" || true)
+        
+        if [ "$IMAGE_COUNT" -ne 1 ]; then
+          echo "ERROR: Expected exactly one image for ${IMAGE}, found ${IMAGE_COUNT}"
+          exit 1
+        fi
+        
         sed -i \
-          "s#image: localhost:5000/bubu-aqua:.*#image: localhost:5000/bubu-aqua:${SHA}#" \
-          gitops/deployment.yaml
+          "s#image: ${IMAGE}:.*#image: ${IMAGE}:${SHA}#" \
+          "$DEPLOYMENT_FILE"
 
         echo "Updated deployment:"
-        grep "image:" gitops/deployment.yaml
-
+        grep "image:" "$DEPLOYMENT_FILE"
+        
         git config user.name "Bubu Aqua CI"
         git config user.email "bubu-aqua-ci@localhost"
-
-        git add gitops/deployment.yaml
+        
+        git add "$DEPLOYMENT_FILE"
 
         if git diff --cached --quiet; then
           echo "No GitOps change necessary."

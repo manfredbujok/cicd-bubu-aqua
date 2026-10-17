@@ -5,6 +5,11 @@ metadata:
   namespace: cicd-bubu-aqua
 
 spec:
+  params:
+    - name: app-path
+      type: string
+      default: .
+
   workspaces:
     - name: source
 
@@ -12,6 +17,10 @@ spec:
     - name: verify
       image: alpine:3.22
       workingDir: $(workspaces.source.path)
+
+      env:
+        - name: APP_PATH
+          value: $(params.app-path)
 
       script: |
         #!/bin/sh
@@ -21,21 +30,30 @@ spec:
         echo " BUBU & AQUA - APP VERIFY 🔍"
         echo "================================"
 
-        echo "Workspace:"
+        cd "$APP_PATH"
+
+        echo "Application directory:"
         pwd
 
         echo ""
-        echo "Application repository:"
-        ls -la
-
-        echo ""
-        echo "Checking required application files..."
+        echo "Checking required files..."
 
         test -f Dockerfile
         echo "✓ Dockerfile"
 
-        test -f index.html
-        echo "✓ index.html"
+        if [ -f pom.xml ]; then
+          echo "✓ Spring Boot project"
+
+          test -d src/main
+          echo "✓ src/main"
+
+        elif [ -f index.html ]; then
+          echo "✓ HTML application"
+
+        else
+          echo "ERROR: Unknown application structure"
+          exit 1
+        fi
 
         echo ""
-        echo "Bubu & Aqua application verification passed 🚀"
+        echo "Application verification passed 🚀"
