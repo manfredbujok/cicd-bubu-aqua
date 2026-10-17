@@ -15,6 +15,6 @@ spec:
     spec:
       containers:
         - name: bubu-aqua
-          image: localhost:5000/bubu-aqua:761939f322ebe3ef62209cd12065bc615363c000
+          image: localhost:5000/bubu-aqua:9e851283d364630ed6b12c8200e012eb28d4c919
           ports:
             - containerPort: 80
